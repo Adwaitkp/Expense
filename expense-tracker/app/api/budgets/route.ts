@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const budgets = await Budget.find({ month }).sort({ category: 1 });
     return NextResponse.json(budgets);
   } catch (error) {
+    console.error("API /budgets GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch budgets" },
       { status: 500 }
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(budget, { status: 201 });
     }
   } catch (error) {
+    console.error("API /budgets POST error:", error);
     return NextResponse.json(
       { error: "Failed to create budget" },
       { status: 500 }
