@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Budget from "@/models/Budget";
+import { rateLimit } from "@/lib/rateLimit";
 
 // GET all budgets for current month
 export async function GET(request: NextRequest) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   try {
     const { searchParams } = new URL(request.url);
     const month = searchParams.get("month") || new Date().toISOString().slice(0, 7);
@@ -22,6 +30,13 @@ export async function GET(request: NextRequest) {
 
 // POST new budget
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   try {
     const body = await request.json();
     const { category, amount, month } = body;

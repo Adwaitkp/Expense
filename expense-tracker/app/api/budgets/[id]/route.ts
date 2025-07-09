@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Budget from "@/models/Budget";
+import { rateLimit } from "@/lib/rateLimit";
 
 // PUT update budget
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   const { id } = await params;
   try {
     const body = await request.json();

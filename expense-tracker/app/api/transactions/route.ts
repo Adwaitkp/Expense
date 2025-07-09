@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Transaction from "@/models/Transaction";
+import { rateLimit } from "@/lib/rateLimit";
 
 // GET all transactions
 export async function GET() {
@@ -19,6 +20,13 @@ export async function GET() {
 
 // POST new transaction
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   try {
     const body = await request.json();
     const { amount, date, description, category } = body;

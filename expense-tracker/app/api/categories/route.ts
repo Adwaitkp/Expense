@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import Category from "@/models/Category";
+import { rateLimit } from "@/lib/rateLimit";
 
 // GET all categories
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   try {
     await connectToDatabase();
     const categories = await Category.find({}).sort({ name: 1 });
@@ -19,6 +27,13 @@ export async function GET() {
 
 // POST new category
 export async function POST(request: NextRequest) {
+  const rl = rateLimit(request);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+      { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
+    );
+  }
   try {
     const body = await request.json();
     const { name } = body;

@@ -28,10 +28,10 @@ export default function TransactionList({
 }: TransactionListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     setDeletingId(id);
     try {
-      await onDelete(id);
+      onDelete(id);
     } finally {
       setDeletingId(null);
     }
@@ -88,7 +88,7 @@ export default function TransactionList({
                   Edit
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="secondary"
                   size="sm"
                   onClick={() => handleDelete(transaction._id)}
                   disabled={deletingId === transaction._id}
