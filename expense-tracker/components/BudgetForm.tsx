@@ -13,13 +13,6 @@ import {
 } from "@/components/ui/select";
 import { CATEGORIES } from "@/lib/categories";
 
-interface Budget {
-  _id: string;
-  category: string;
-  amount: number;
-  month: string;
-}
-
 interface BudgetFormProps {
   onSubmit: (data: { category: string; amount: string; month: string }) => void;
   initialData?: { category: string; amount: string; month: string };

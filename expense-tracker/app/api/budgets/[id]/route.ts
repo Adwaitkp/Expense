@@ -42,7 +42,7 @@ export async function PUT(
     }
 
     return NextResponse.json(budget);
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to update budget" },
       { status: 500 }
@@ -68,7 +68,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: "Budget deleted" });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Failed to delete budget" },
       { status: 500 }

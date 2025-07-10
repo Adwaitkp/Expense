@@ -9,8 +9,8 @@ export async function GET() {
     await connectToDatabase();
     const transactions = await Transaction.find({}).sort({ date: -1 });
     return NextResponse.json(transactions);
-  } catch (error) {
-    console.error("API /transactions GET error:", error);
+  } catch (_error) {
+    console.error("API /transactions GET error:", _error);
     return NextResponse.json(
       { error: "Failed to fetch transactions" },
       { status: 500 }
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
 
     await transaction.save();
     return NextResponse.json(transaction, { status: 201 });
-  } catch (error) {
-    console.error("API /transactions POST error:", error);
+  } catch (_error) {
+    console.error("API /transactions POST error:", _error);
     return NextResponse.json(
       { error: "Failed to create transaction" },
       { status: 500 }
