@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import TransactionList from "@/components/TransactionList";
 import MonthlyExpensesChart from "@/components/MonthlyExpensesChart";
@@ -12,7 +12,6 @@ import BudgetVsActualChart from "@/components/BudgetVsActualChart";
 import SpendingInsights from "@/components/SpendingInsights";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { debounce } from "@/lib/utils";
 
 interface Transaction {
   _id: string;
@@ -49,7 +48,7 @@ export default function Home() {
     }
   };
 
-  const fetchBudgets = async () => {
+  const fetchBudgets = useCallback(async () => {
     try {
       const response = await fetch(`/api/budgets?month=${currentMonth}`);
       const data = await response.json();
@@ -59,12 +58,12 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth]);
 
   useEffect(() => {
     fetchTransactions();
     fetchBudgets();
-  }, [currentMonth]);
+  }, [fetchBudgets]);
 
   const handleAddTransaction = async (formData: {
     amount: string;
@@ -182,9 +181,6 @@ export default function Home() {
     }
   };
 
-  const debouncedAddTransaction = debounce(handleAddTransaction, 1000);
-  const debouncedAddBudget = debounce(handleAddBudget, 1000);
-
   if (loading) {
     return (
       <div className="container mx-auto p-4">
@@ -220,7 +216,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
               <TransactionForm
-                onSubmit={editingTransaction ? handleEditTransaction : debouncedAddTransaction}
+                onSubmit={editingTransaction ? handleEditTransaction : handleAddTransaction}
                 initialData={
                   editingTransaction
                     ? {
@@ -264,7 +260,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
               <BudgetForm
-                onSubmit={editingBudget ? handleEditBudget : debouncedAddBudget}
+                onSubmit={editingBudget ? handleEditBudget : handleAddBudget}
                 initialData={
                   editingBudget
                     ? {

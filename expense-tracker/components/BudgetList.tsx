@@ -77,7 +77,7 @@ export default function BudgetList({
                   Edit
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="secondary"
                   size="sm"
                   onClick={() => handleDelete(budget._id)}
                   disabled={deletingId === budget._id}

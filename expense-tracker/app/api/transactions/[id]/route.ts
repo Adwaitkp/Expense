@@ -6,7 +6,7 @@ import { rateLimit } from "@/lib/rateLimit";
 // PUT update transaction
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const rl = rateLimit(request);
   if (!rl.allowed) {
@@ -15,6 +15,7 @@ export async function PUT(
       { status: 429, headers: { 'Retry-After': rl.retryAfter?.toString() || '60' } }
     );
   }
+  const { id } = await params;
 
   try {
     const body = await request.json();
@@ -29,7 +30,7 @@ export async function PUT(
 
     await connectToDatabase();
     const transaction = await Transaction.findByIdAndUpdate(
-      params.id,
+      id,
       {
         amount: parseFloat(amount),
         date: new Date(date),
@@ -47,7 +48,7 @@ export async function PUT(
     }
 
     return NextResponse.json(transaction);
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to update transaction" },
       { status: 500 }
@@ -58,11 +59,12 @@ export async function PUT(
 // DELETE transaction
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectToDatabase();
-    const transaction = await Transaction.findByIdAndDelete(params.id);
+    const transaction = await Transaction.findByIdAndDelete(id);
 
     if (!transaction) {
       return NextResponse.json(
@@ -72,7 +74,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: "Transaction deleted" });
-  } catch (_error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to delete transaction" },
       { status: 500 }
